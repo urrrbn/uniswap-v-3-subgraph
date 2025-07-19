@@ -1,0 +1,33 @@
+type User @entity(immutable: false) {
+  id: Bytes!
+  positions: [Position!]! @derivedFrom(field: "owner")
+}
+
+type Position @entity(immutable: false) {
+  id: ID!
+  owner: User!
+  createdAt: BigInt!
+  liquidity: BigInt!
+  events: [PositionEvent!]! @derivedFrom(field: "position")
+}
+
+type PositionEvent @entity(immutable: true) {
+  id: ID!
+  position: Position!
+  type: PositionEventType!
+  txHash: Bytes!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  amount: BigInt!
+  amount0: BigInt!
+  amount1: BigInt!
+  sender: Bytes!
+  recipient: Bytes
+}
+
+enum PositionEventType {
+  MINT
+  INCREASE
+  DECREASE
+  TRANSFER
+}
