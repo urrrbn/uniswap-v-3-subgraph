@@ -5,6 +5,7 @@ type User @entity(immutable: false) {
 
 type Position @entity(immutable: false) {
   id: ID!
+  pool: Bytes!
   owner: User!
   createdAt: BigInt!
   liquidity: BigInt!

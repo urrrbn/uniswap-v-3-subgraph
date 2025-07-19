@@ -111,148 +111,35 @@ graph deploy uniswap-v3-positions
 ```graphql
 {
   user(id: "0x742d35cc6bb1966c1c") {
-    id
     positions {
       id
       liquidity
       createdAt
-      events(first: 5, orderBy: timestamp, orderDirection: desc) {
-        type
-        amount
-        timestamp
-      }
     }
   }
 }
 ```
 
-### Recent Position Events
+### Recent Position Events  
 ```graphql
 {
-  positionEvents(
-    first: 10
-    orderBy: timestamp
-    orderDirection: desc
-  ) {
+  positionEvents(first: 10, orderBy: timestamp, orderDirection: desc) {
     id
     type
     amount
-    position {
-      id
-      owner { id }
-    }
-    txHash
+    position { id }
     timestamp
   }
 }
 ```
 
-### Active Positions (with liquidity)
+### Active Positions
 ```graphql
 {
-  positions(
-    where: { liquidity_gt: "0" }
-    first: 50
-    orderBy: liquidity
-    orderDirection: desc
-  ) {
+  positions(where: { liquidity_gt: "0" }, first: 50) {
     id
     liquidity
     owner { id }
-    createdAt
   }
-}
-```
-
-### Filter by Event Type
-```graphql
-{
-  positionEvents(
-    where: { type: MINT }
-    first: 20
-    orderBy: timestamp
-    orderDirection: desc
-  ) {
-    id
-    amount
-    position {
-      id
-      owner { id }
-    }
-    timestamp
-  }
-}
-```
-
-### Position Event History
-```graphql
-{
-  position(id: "123456") {
-    id
-    liquidity
-    owner { id }
-    events(orderBy: timestamp) {
-      type
-      amount
-      amount0
-      amount1
-      timestamp
-      txHash
-    }
-  }
-}
-```
-
-## 🔧 Backend Integration
-
-### TypeScript/JavaScript
-```typescript
-import { request, gql } from 'graphql-request'
-
-const endpoint = 'https://api.studio.thegraph.com/query/116376/uniswap-v-3-positions/v0.0.8'
-
-// Get user positions
-const getUserPositions = async (userAddress: string) => {
-  const query = gql`
-    query GetUserPositions($user: String!) {
-      user(id: $user) {
-        positions {
-          id
-          liquidity
-          events(first: 10, orderBy: timestamp, orderDirection: desc) {
-            type
-            amount
-            timestamp
-          }
-        }
-      }
-    }
-  `
-  
-  return request(endpoint, query, { user: userAddress.toLowerCase() })
-}
-
-// Track new positions
-const getRecentMints = async (since: number) => {
-  const query = gql`
-    query GetRecentMints($since: BigInt!) {
-      positionEvents(
-        where: { type: MINT, timestamp_gte: $since }
-        orderBy: timestamp
-        orderDirection: desc
-      ) {
-        position {
-          id
-          owner { id }
-          liquidity
-        }
-        amount
-        timestamp
-        txHash
-      }
-    }
-  `
-  
-  return request(endpoint, query, { since: since.toString() })
 }
 ```

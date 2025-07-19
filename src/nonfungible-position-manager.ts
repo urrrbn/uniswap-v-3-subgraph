@@ -1,4 +1,4 @@
-import { BigInt, Bytes, Address } from "@graphprotocol/graph-ts"
+import { BigInt, Bytes, Address, ethereum } from "@graphprotocol/graph-ts"
 import {
   DecreaseLiquidity as DecreaseLiquidityEvent,
   IncreaseLiquidity as IncreaseLiquidityEvent,
@@ -6,10 +6,14 @@ import {
   NonfungiblePositionManager
 } from "../generated/NonfungiblePositionManager/NonfungiblePositionManager"
 import {
+  UniswapV3Factory
+} from "../generated/NonfungiblePositionManager/UniswapV3Factory"
+import {
   User,
   Position,
   PositionEvent
 } from "../generated/schema"
+import { TARGET_POOLS, isTrackedPool } from './constants'
 
 function loadOrCreateUser(address: Bytes): User {
   let user = User.load(address)
@@ -20,17 +24,7 @@ function loadOrCreateUser(address: Bytes): User {
   return user
 }
 
-function loadOrCreatePosition(tokenId: BigInt, owner: Bytes): Position {
-  let position = Position.load(tokenId.toString())
-  if (position == null) {
-    position = new Position(tokenId.toString())
-    position.owner = loadOrCreateUser(owner).id
-    position.createdAt = BigInt.fromI32(0) // Will be set when first event is processed
-    position.liquidity = BigInt.fromI32(0)
-    position.save()
-  }
-  return position
-}
+
 
 function createPositionEvent(
   position: Position,
@@ -65,21 +59,57 @@ function createPositionEvent(
   return positionEvent
 }
 
+/**  Load or initialise a Position for tokenId.
+ *  Returns null if the pool is NOT in TARGET_POOLS.
+ *  Uses one factory.getPool() call the first time the tokenId is seen.
+ */
+function getOrInitPosition(event: ethereum.Event, tokenId: BigInt): Position | null {
+  let pos = Position.load(tokenId.toString())
+  if (pos !== null) {
+    return isTrackedPool(Address.fromBytes(pos.pool as Bytes)) ? pos : null
+  }
+
+  // ───── first encounter ─────
+  let mgr  = NonfungiblePositionManager.bind(event.address)
+  let res  = mgr.try_positions(tokenId)
+  if (res.reverted) return null
+
+  let staticData = res.value  // (nonce, operator, token0, token1, fee, ...)
+  // Get factory address from position manager
+  let factoryResult = mgr.try_factory()
+  if (factoryResult.reverted) return null
+  
+  let factory = UniswapV3Factory.bind(factoryResult.value)
+  let poolAddr = factory.getPool(staticData.value2, staticData.value3, staticData.value4)
+
+  if (!isTrackedPool(poolAddr)) return null
+
+  // Get the actual owner from the NFT contract
+  let ownerResult = mgr.try_ownerOf(tokenId)
+  if (ownerResult.reverted) return null
+
+  pos              = new Position(tokenId.toString())
+  pos.pool         = poolAddr
+  pos.owner        = loadOrCreateUser(ownerResult.value).id
+  pos.createdAt    = BigInt.fromI32(0)  // Will be set by handleIncreaseLiquidity on first MINT
+  pos.liquidity    = BigInt.zero()
+  pos.save()
+  return pos
+}
+
 export function handleDecreaseLiquidity(event: DecreaseLiquidityEvent): void {
-  let tokenId = event.params.tokenId
+  // For decreases, only process existing positions - don't create new ones
+  let position = Position.load(event.params.tokenId.toString())
+  if (position == null) return   // <- early exit for non-existent positions
+  
+  // Additional check: ensure this position is from a tracked pool
+  if (!isTrackedPool(Address.fromBytes(position.pool as Bytes))) {
+    return // Not a tracked pool
+  }
+  
   let liquidityDelta = event.params.liquidity
   let amount0 = event.params.amount0
   let amount1 = event.params.amount1
-  
-  // Get the NFT contract
-  let nftContract = NonfungiblePositionManager.bind(event.address)
-  let ownerResult = nftContract.try_ownerOf(tokenId)
-  if (ownerResult.reverted) {
-    return // Position doesn't exist or was burned
-  }
-  
-  let owner = ownerResult.value
-  let position = loadOrCreatePosition(tokenId, owner)
   
   // Update position liquidity
   position.liquidity = position.liquidity.minus(liquidityDelta)
@@ -101,20 +131,12 @@ export function handleDecreaseLiquidity(event: DecreaseLiquidityEvent): void {
 }
 
 export function handleIncreaseLiquidity(event: IncreaseLiquidityEvent): void {
-  let tokenId = event.params.tokenId
+  let position = getOrInitPosition(event, event.params.tokenId)
+  if (position == null) return   // <- early exit for untracked pools
+  
   let liquidityDelta = event.params.liquidity
   let amount0 = event.params.amount0
   let amount1 = event.params.amount1
-  
-  // Get the NFT contract
-  let nftContract = NonfungiblePositionManager.bind(event.address)
-  let ownerResult = nftContract.try_ownerOf(tokenId)
-  if (ownerResult.reverted) {
-    return // Position doesn't exist
-  }
-  
-  let owner = ownerResult.value
-  let position = loadOrCreatePosition(tokenId, owner)
   
   // If this is the first time we see this position, set createdAt and this is a MINT
   let isFirstIncrease = position.createdAt.equals(BigInt.fromI32(0))
@@ -151,15 +173,8 @@ export function handleTransfer(event: TransferEvent): void {
   
   // Handle new position creation (mint from zero address)
   if (from.equals(Address.zero())) {
-    // Get the NFT contract to find the owner
-    let nftContract = NonfungiblePositionManager.bind(event.address)
-    let ownerResult = nftContract.try_ownerOf(tokenId)
-    if (ownerResult.reverted) {
-      return // Position doesn't exist
-    }
-    
-    let owner = ownerResult.value
-    let position = loadOrCreatePosition(tokenId, owner)
+    let position = getOrInitPosition(event, tokenId)
+    if (position == null) return   // <- early exit for untracked pools
     
     // Update owner
     position.owner = loadOrCreateUser(to).id
@@ -187,6 +202,11 @@ export function handleTransfer(event: TransferEvent): void {
   let position = Position.load(tokenId.toString())
   if (position == null) {
     return // We don't track this position
+  }
+  
+  // Additional check: ensure this position is from a tracked pool
+  if (!isTrackedPool(Address.fromBytes(position.pool as Bytes))) {
+    return // Not a tracked pool
   }
   
   // Handle burn (transfer to zero address)
