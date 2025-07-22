@@ -1,6 +1,9 @@
 type User @entity(immutable: false) {
   id: Bytes!
   positions: [Position!]! @derivedFrom(field: "owner")
+  bitUSDPurchases: [BitUSDPurchase!]! @derivedFrom(field: "user")
+  totalBitUSDVolume: BigInt! # Total BitUSD purchased by this user
+  lastPurchaseTimestamp: BigInt! # Last time user purchased BitUSD
 }
 
 type Position @entity(immutable: false) {
@@ -24,6 +27,20 @@ type PositionEvent @entity(immutable: true) {
   amount1: BigInt!
   sender: Bytes!
   recipient: Bytes
+}
+
+type BitUSDPurchase @entity(immutable: true) {
+  id: ID!
+  pool: Bytes!
+  user: User!
+  sender: Bytes!
+  recipient: Bytes!
+  bitUSDAmount: BigInt! # Amount of BitUSD purchased (always positive)
+  otherTokenAmount: BigInt! # Amount of other token sold (always positive)
+  txHash: Bytes!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  logIndex: BigInt!
 }
 
 enum PositionEventType {

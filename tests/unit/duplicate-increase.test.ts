@@ -10,6 +10,7 @@ import {
   beforeEach as testBeforeEach,
   USER_1,
   CONTRACT_ADDRESS,
+  TRACKED_POOL,
   setupTrackedPoolMocks,
   createIncreaseLiquidityEvent,
   getExpectedEventId
@@ -61,7 +62,7 @@ describe("Duplicate Increase Handling", () => {
     assert.fieldEquals("Position", tokenId.toString(), "id", tokenId.toString())
     // createdAt should be set after first event
     // Position should be linked to tracked pool
-    assert.fieldEquals("Position", tokenId.toString(), "pool", "0x1111111111111111111111111111111111111111")
+    assert.fieldEquals("Position", tokenId.toString(), "pool", TRACKED_POOL.toHexString())
   })
 
   test("triple_increase_accumulates_liquidity", () => {

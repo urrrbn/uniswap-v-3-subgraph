@@ -23,24 +23,12 @@ import {
   getExpectedEventId
 } from "../helpers"
 
-// Note: This test requires modifying TARGET_POOLS in constants.ts to include TRACKED_POOL_2
-// For production, you would update src/constants.ts to include multiple pool addresses
-
 describe("Multi-Pool Support", () => {
   beforeEach(() => {
     testBeforeEach()
-    // TODO: Dynamically add TRACKED_POOL_2 to TARGET_POOLS array for testing
-    // In a real scenario, you would update constants.ts to include:
-    // export const TARGET_POOLS: Address[] = [
-    //   Address.fromString('0x1111111111111111111111111111111111111111'), // TRACKED_POOL
-    //   Address.fromString('0x3333333333333333333333333333333333333333')  // TRACKED_POOL_2
-    // ]
   })
 
   test("second_pool_in_allowlist_is_tracked", () => {
-    // Note: This test will initially fail until TARGET_POOLS is updated to include TRACKED_POOL_2
-    // This demonstrates the need to update the allowlist configuration
-    
     // Arrange: Create positions in both tracked pools
     let tokenId1 = BigInt.fromI32(6001) // Will be in TRACKED_POOL
     let tokenId2 = BigInt.fromI32(6002) // Will be in TRACKED_POOL_2
@@ -56,12 +44,12 @@ describe("Multi-Pool Support", () => {
     handleIncreaseLiquidity(createIncreaseLiquidityEvent(tokenId1, liquidity, BigInt.fromI32(100), BigInt.fromI32(200)))
     handleIncreaseLiquidity(createIncreaseLiquidityEvent(tokenId2, liquidity, BigInt.fromI32(100), BigInt.fromI32(200)))
 
-    // Assert: First pool position created (this should work)
+    // Assert: First pool position created
     assert.fieldEquals("Position", tokenId1.toString(), "pool", TRACKED_POOL.toHexString())
     assert.fieldEquals("Position", tokenId1.toString(), "liquidity", liquidity.toString())
     assert.fieldEquals("Position", tokenId1.toString(), "owner", USER_1.toHexString())
 
-    // Assert: Second pool position created (now that TRACKED_POOL_2 is in TARGET_POOLS)
+    // Assert: Second pool position created
     assert.fieldEquals("Position", tokenId2.toString(), "pool", TRACKED_POOL_2.toHexString())
     assert.fieldEquals("Position", tokenId2.toString(), "liquidity", liquidity.toString())
     assert.fieldEquals("Position", tokenId2.toString(), "owner", USER_1.toHexString())
@@ -113,11 +101,6 @@ describe("Multi-Pool Support", () => {
     // Untracked pool should be ignored, so count should remain 1
     assert.notInStore("Position", untrackedTokenId.toString())
     assert.entityCount("Position", 1) // Should still be 1 (only trackedTokenId1)
-
-    // Finally, test tracked pool 2 in a separate flow to avoid conflicts
-    // Note: Due to mock setup limitations in matchstick, testing multiple different pools
-    // in the same test can cause conflicts. In production, both pools would work correctly.
-    // The individual test "second_pool_in_allowlist_is_tracked" validates this.
   })
 
   test("pool_filtering_is_consistent_across_handlers", () => {
@@ -190,14 +173,4 @@ describe("Multi-Pool Support", () => {
     // 3. Memory usage remains bounded (entities created match expected count)
     // 4. No exponential performance degradation with token count
   })
-})
-
-// Helper function to simulate updating TARGET_POOLS for testing
-// In production, this would be done by modifying src/constants.ts
-export function addPoolToAllowlist(poolAddress: Address): void {
-  // TODO: Implement mechanism to dynamically update TARGET_POOLS for testing
-  // This could involve:
-  // 1. Modifying the constants file during test setup
-  // 2. Using a test-specific version of the isTrackedPool function
-  // 3. Implementing a runtime allowlist update mechanism
-} 
+}) 

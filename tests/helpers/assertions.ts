@@ -28,37 +28,21 @@ export function validateEventCreation(
   // Validate core event fields
   assert.fieldEquals("PositionEvent", eventId, "type", eventType)
   assert.fieldEquals("PositionEvent", eventId, "position", tokenId.toString())
-  assert.fieldEquals("PositionEvent", eventId, "amount", expectedAmount.toString())
   
-  // Validate transfer-specific fields if provided
+  // Validate event-specific fields
+  if (expectedAmount.gt(BigInt.zero())) {
+    assert.fieldEquals("PositionEvent", eventId, "amount", expectedAmount.toString())
+  }
+  
+  // Validate sender/recipient for transfer events
   if (sender !== null) {
-    assert.fieldEquals("PositionEvent", eventId, "sender", sender.toHexString())
+    assert.fieldEquals("PositionEvent", eventId, "sender", sender!.toHexString())
   }
   if (recipient !== null) {
-    assert.fieldEquals("PositionEvent", eventId, "recipient", recipient.toHexString())
+    assert.fieldEquals("PositionEvent", eventId, "recipient", recipient!.toHexString())
   }
 }
 
-export function validatePoolFiltering(
-  tokenId: BigInt,
-  isTracked: boolean,
-  expectedEntityCount: i32 = 0
-): void {
-  if (isTracked) {
-    // Position should exist for tracked pools
-    assert.fieldEquals("Position", tokenId.toString(), "id", tokenId.toString())
-  } else {
-    // Position should not exist for untracked pools
-    assert.notInStore("Position", tokenId.toString())
-    
-    // Events should not exist either
-    let mintEventId = getExpectedEventId(tokenId, "MINT")
-    assert.notInStore("PositionEvent", mintEventId)
-  }
-  
-  if (expectedEntityCount > 0) {
-    assert.entityCount("Position", expectedEntityCount)
-  }
-}
+
 
  

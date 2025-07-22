@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+build/
+generated/
+
+# Lock files
+yarn.lock
+package-lock.json
+
+# Logs
+*.log
+
+# Git
+.git/
+
+# IDE
+.vscode/
+.idea/
+
+# Binary files
+*.wasm
+
+# Generated ABIs (if they exist)
+abis/ 

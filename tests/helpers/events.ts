@@ -1,6 +1,7 @@
 import { newMockEvent } from "matchstick-as/assembly/index"
 import { Address, BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { DecreaseLiquidity, IncreaseLiquidity, Transfer } from "../../generated/NonfungiblePositionManager/NonfungiblePositionManager"
+import { Swap } from "../../generated/BitUSDmTBILLPool/UniswapV3Pool"
 import { CONTRACT_ADDRESS } from "./constants"
 
 // Helper function to generate consistent event IDs matching what the handlers create
@@ -9,6 +10,14 @@ export function getExpectedEventId(tokenId: BigInt, eventType: string): string {
   let txHash = "0xa16081f360e3847006db660bae1c6d1b2e17ec2a"
   let logIndex = "1"
   return txHash + "-" + logIndex + "-" + tokenId.toString() + "-" + eventType
+}
+
+// Helper function to generate consistent swap IDs
+export function getExpectedSwapId(): string {
+  // Mock events generate consistent transaction hash and log index
+  let txHash = "0xa16081f360e3847006db660bae1c6d1b2e17ec2a"
+  let logIndex = "1"
+  return txHash + "-" + logIndex
 }
 
 // Event creation helpers
@@ -108,6 +117,55 @@ export function createTransferEvent(
   )
   event.parameters.push(
     new ethereum.EventParam("tokenId", ethereum.Value.fromUnsignedBigInt(tokenId))
+  )
+  
+  return event
+}
+
+export function createSwapEvent(
+  poolAddress: Address,
+  sender: Address,
+  recipient: Address,
+  amount0: BigInt,
+  amount1: BigInt,
+  transactionFrom: Address = sender  // Default to sender for backwards compatibility
+): Swap {
+  let mockEvent = newMockEvent()
+  let event = new Swap(
+    poolAddress,
+    mockEvent.logIndex,
+    mockEvent.transactionLogIndex,
+    mockEvent.logType,
+    mockEvent.block,
+    mockEvent.transaction,
+    mockEvent.parameters,
+    mockEvent.receipt
+  )
+  
+  // Set the transaction initiator (actual user)
+  event.transaction.from = transactionFrom
+  
+  event.parameters = new Array()
+  event.parameters.push(
+    new ethereum.EventParam("sender", ethereum.Value.fromAddress(sender))
+  )
+  event.parameters.push(
+    new ethereum.EventParam("recipient", ethereum.Value.fromAddress(recipient))
+  )
+  event.parameters.push(
+    new ethereum.EventParam("amount0", ethereum.Value.fromSignedBigInt(amount0))
+  )
+  event.parameters.push(
+    new ethereum.EventParam("amount1", ethereum.Value.fromSignedBigInt(amount1))
+  )
+  event.parameters.push(
+    new ethereum.EventParam("sqrtPriceX96", ethereum.Value.fromUnsignedBigInt(BigInt.fromString("1461446703485210103287273052203988822378723970342")))
+  )
+  event.parameters.push(
+    new ethereum.EventParam("liquidity", ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(50000)))
+  )
+  event.parameters.push(
+    new ethereum.EventParam("tick", ethereum.Value.fromI32(200))
   )
   
   return event
