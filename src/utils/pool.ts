@@ -31,8 +31,12 @@ export function getPoolConfig(poolAddress: Address): PoolConfig | null {
  * Determines if a swap is buying BitUSD based on the pool configuration and amounts
  * Returns true if user is buying BitUSD, false otherwise
  */
-export function isBuyingBitUSD(poolAddress: Address, amount0: BigInt, amount1: BigInt): bool {
-  let config = getPoolConfig(poolAddress)
+export function isBuyingBitUSD(
+  poolAddress: Address,
+  amount0: BigInt,
+  amount1: BigInt
+): bool {
+  const config = getPoolConfig(poolAddress)
   if (config === null) return false
 
   if (config.bitUSDTokenIndex == 0) {
@@ -47,8 +51,12 @@ export function isBuyingBitUSD(poolAddress: Address, amount0: BigInt, amount1: B
 /**
  * Gets the BitUSD amount from a swap (always returns positive value)
  */
-export function getBitUSDAmount(poolAddress: Address, amount0: BigInt, amount1: BigInt): BigInt {
-  let config = getPoolConfig(poolAddress)
+export function getBitUSDAmount(
+  poolAddress: Address,
+  amount0: BigInt,
+  amount1: BigInt
+): BigInt {
+  const config = getPoolConfig(poolAddress)
   if (config === null) return BigInt.zero()
 
   if (config.bitUSDTokenIndex == 0) {
@@ -61,8 +69,12 @@ export function getBitUSDAmount(poolAddress: Address, amount0: BigInt, amount1: 
 /**
  * Gets the other token amount from a swap (always returns positive value)
  */
-export function getOtherTokenAmount(poolAddress: Address, amount0: BigInt, amount1: BigInt): BigInt {
-  let config = getPoolConfig(poolAddress)
+export function getOtherTokenAmount(
+  poolAddress: Address,
+  amount0: BigInt,
+  amount1: BigInt
+): BigInt {
+  const config = getPoolConfig(poolAddress)
   if (config === null) return BigInt.zero()
 
   if (config.bitUSDTokenIndex == 0) {
@@ -70,4 +82,4 @@ export function getOtherTokenAmount(poolAddress: Address, amount0: BigInt, amoun
   } else {
     return amount0.abs() // Other token is token0
   }
-} 
+}

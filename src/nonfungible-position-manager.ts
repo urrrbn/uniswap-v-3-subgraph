@@ -1,41 +1,39 @@
-import { BigInt, Bytes, Address } from "@graphprotocol/graph-ts"
+import { BigInt, Bytes, Address } from '@graphprotocol/graph-ts'
 import {
   DecreaseLiquidity as DecreaseLiquidityEvent,
   IncreaseLiquidity as IncreaseLiquidityEvent,
   Transfer as TransferEvent,
-} from "../generated/NonfungiblePositionManager/NonfungiblePositionManager"
-import {
-  Position
-} from "../generated/schema"
+} from '../generated/NonfungiblePositionManager/NonfungiblePositionManager'
+import { Position } from '../generated/schema'
 import { isTrackedPool } from './utils/pool'
-import { 
+import {
   loadOrCreateUser,
   createPositionEvent,
-  getOrInitPosition
+  getOrInitPosition,
 } from './utils/entities'
 
 export function handleDecreaseLiquidity(event: DecreaseLiquidityEvent): void {
   // For decreases, only process existing positions - don't create new ones
-  let position = Position.load(event.params.tokenId.toString())
-  if (position == null) return   // <- early exit for non-existent positions
-  
+  const position = Position.load(event.params.tokenId.toString())
+  if (position == null) return // <- early exit for non-existent positions
+
   // Additional check: ensure this position is from a tracked pool
   if (!isTrackedPool(Address.fromBytes(position.pool as Bytes))) {
     return // Not a tracked pool
   }
-  
-  let liquidityDelta = event.params.liquidity
-  let amount0 = event.params.amount0
-  let amount1 = event.params.amount1
-  
+
+  const liquidityDelta = event.params.liquidity
+  const amount0 = event.params.amount0
+  const amount1 = event.params.amount1
+
   // Update position liquidity
   position.liquidity = position.liquidity.minus(liquidityDelta)
   position.save()
-  
+
   // Create position event
   createPositionEvent(
     position,
-    "DECREASE",
+    'DECREASE',
     event.transaction.hash,
     event.logIndex,
     event.block.timestamp,
@@ -48,26 +46,26 @@ export function handleDecreaseLiquidity(event: DecreaseLiquidityEvent): void {
 }
 
 export function handleIncreaseLiquidity(event: IncreaseLiquidityEvent): void {
-  let position = getOrInitPosition(event, event.params.tokenId)
-  if (position == null) return   // <- early exit for untracked pools
-  
-  let liquidityDelta = event.params.liquidity
-  let amount0 = event.params.amount0
-  let amount1 = event.params.amount1
-  
+  const position = getOrInitPosition(event, event.params.tokenId)
+  if (position == null) return // <- early exit for untracked pools
+
+  const liquidityDelta = event.params.liquidity
+  const amount0 = event.params.amount0
+  const amount1 = event.params.amount1
+
   // If this is the first time we see this position, set createdAt and this is a MINT
-  let isFirstIncrease = position.createdAt.equals(BigInt.fromI32(0))
+  const isFirstIncrease = position.createdAt.equals(BigInt.fromI32(0))
   if (isFirstIncrease) {
     position.createdAt = event.block.timestamp
   }
-  
+
   // Update position liquidity
   position.liquidity = position.liquidity.plus(liquidityDelta)
   position.save()
-  
+
   // Create event - MINT only for the very first increase, otherwise INCREASE
-  let eventType = isFirstIncrease ? "MINT" : "INCREASE"
-  
+  const eventType = isFirstIncrease ? 'MINT' : 'INCREASE'
+
   // Create position event
   createPositionEvent(
     position,
@@ -84,24 +82,24 @@ export function handleIncreaseLiquidity(event: IncreaseLiquidityEvent): void {
 }
 
 export function handleTransfer(event: TransferEvent): void {
-  let tokenId = event.params.tokenId
-  let from = event.params.from
-  let to = event.params.to
-  
+  const tokenId = event.params.tokenId
+  const from = event.params.from
+  const to = event.params.to
+
   // Handle new position creation (mint from zero address)
   if (from.equals(Address.zero())) {
-    let position = getOrInitPosition(event, tokenId)
-    if (position == null) return   // <- early exit for untracked pools
-    
+    const position = getOrInitPosition(event, tokenId)
+    if (position == null) return // <- early exit for untracked pools
+
     // Update owner
     position.owner = loadOrCreateUser(to).id
     // Don't set createdAt here - let IncreaseLiquidity handle the MINT event
     position.save()
-    
+
     // Only create TRANSFER event, not MINT (IncreaseLiquidity will handle MINT)
     createPositionEvent(
       position,
-      "TRANSFER",
+      'TRANSFER',
       event.transaction.hash,
       event.logIndex,
       event.block.timestamp,
@@ -114,28 +112,28 @@ export function handleTransfer(event: TransferEvent): void {
     )
     return
   }
-  
+
   // For existing positions (transfers and burns), check if we already have this position
-  let position = Position.load(tokenId.toString())
+  const position = Position.load(tokenId.toString())
   if (position == null) {
     return // We don't track this position
   }
-  
+
   // Additional check: ensure this position is from a tracked pool
   if (!isTrackedPool(Address.fromBytes(position.pool as Bytes))) {
     return // Not a tracked pool
   }
-  
+
   // Handle burn (transfer to zero address)
   if (to.equals(Address.zero())) {
     // Update owner to zero address
     position.owner = loadOrCreateUser(to).id
     position.save()
-    
+
     // Create transfer event
     createPositionEvent(
       position,
-      "TRANSFER",
+      'TRANSFER',
       event.transaction.hash,
       event.logIndex,
       event.block.timestamp,
@@ -148,16 +146,16 @@ export function handleTransfer(event: TransferEvent): void {
     )
     return
   }
-  
+
   // Handle regular transfers (not from/to zero address)
   // Update position owner
   position.owner = loadOrCreateUser(to).id
   position.save()
-  
+
   // Create transfer event
   createPositionEvent(
     position,
-    "TRANSFER",
+    'TRANSFER',
     event.transaction.hash,
     event.logIndex,
     event.block.timestamp,

@@ -4,24 +4,24 @@ module.exports = {
   singleQuote: true,
   quoteProps: 'as-needed',
   trailingComma: 'es5',
-  
+
   // Indentation
   tabWidth: 2,
   useTabs: false,
-  
+
   // Line wrapping
   printWidth: 80,
-  
+
   // Bracket spacing
   bracketSpacing: true,
   bracketSameLine: false,
-  
+
   // Arrow functions
   arrowParens: 'avoid',
-  
+
   // End of line
   endOfLine: 'lf',
-  
+
   // Override for specific file types
   overrides: [
     {
@@ -44,4 +44,4 @@ module.exports = {
       },
     },
   ],
-}; 
+}

@@ -1,23 +1,27 @@
-import { newMockEvent } from "matchstick-as/assembly/index"
-import { Address, BigInt, ethereum } from "@graphprotocol/graph-ts"
-import { DecreaseLiquidity, IncreaseLiquidity, Transfer } from "../../generated/NonfungiblePositionManager/NonfungiblePositionManager"
-import { Swap } from "../../generated/BitUSDmTBILLPool/UniswapV3Pool"
-import { CONTRACT_ADDRESS } from "./constants"
+import { newMockEvent } from 'matchstick-as/assembly/index'
+import { Address, BigInt, ethereum } from '@graphprotocol/graph-ts'
+import {
+  DecreaseLiquidity,
+  IncreaseLiquidity,
+  Transfer,
+} from '../../generated/NonfungiblePositionManager/NonfungiblePositionManager'
+import { Swap } from '../../generated/BitUSDmTBILLPool/UniswapV3Pool'
+import { CONTRACT_ADDRESS } from './constants'
 
 // Helper function to generate consistent event IDs matching what the handlers create
 export function getExpectedEventId(tokenId: BigInt, eventType: string): string {
   // Mock events generate consistent transaction hash and log index
-  let txHash = "0xa16081f360e3847006db660bae1c6d1b2e17ec2a"
-  let logIndex = "1"
-  return txHash + "-" + logIndex + "-" + tokenId.toString() + "-" + eventType
+  const txHash = '0xa16081f360e3847006db660bae1c6d1b2e17ec2a'
+  const logIndex = '1'
+  return txHash + '-' + logIndex + '-' + tokenId.toString() + '-' + eventType
 }
 
 // Helper function to generate consistent swap IDs
 export function getExpectedSwapId(): string {
   // Mock events generate consistent transaction hash and log index
-  let txHash = "0xa16081f360e3847006db660bae1c6d1b2e17ec2a"
-  let logIndex = "1"
-  return txHash + "-" + logIndex
+  const txHash = '0xa16081f360e3847006db660bae1c6d1b2e17ec2a'
+  const logIndex = '1'
+  return txHash + '-' + logIndex
 }
 
 // Event creation helpers
@@ -27,8 +31,8 @@ export function createIncreaseLiquidityEvent(
   amount0: BigInt,
   amount1: BigInt
 ): IncreaseLiquidity {
-  let mockEvent = newMockEvent()
-  let event = new IncreaseLiquidity(
+  const mockEvent = newMockEvent()
+  const event = new IncreaseLiquidity(
     CONTRACT_ADDRESS,
     mockEvent.logIndex,
     mockEvent.transactionLogIndex,
@@ -38,21 +42,33 @@ export function createIncreaseLiquidityEvent(
     mockEvent.parameters,
     mockEvent.receipt
   )
-  
+
   event.parameters = new Array()
   event.parameters.push(
-    new ethereum.EventParam("tokenId", ethereum.Value.fromUnsignedBigInt(tokenId))
+    new ethereum.EventParam(
+      'tokenId',
+      ethereum.Value.fromUnsignedBigInt(tokenId)
+    )
   )
   event.parameters.push(
-    new ethereum.EventParam("liquidity", ethereum.Value.fromUnsignedBigInt(liquidity))
+    new ethereum.EventParam(
+      'liquidity',
+      ethereum.Value.fromUnsignedBigInt(liquidity)
+    )
   )
   event.parameters.push(
-    new ethereum.EventParam("amount0", ethereum.Value.fromUnsignedBigInt(amount0))
+    new ethereum.EventParam(
+      'amount0',
+      ethereum.Value.fromUnsignedBigInt(amount0)
+    )
   )
   event.parameters.push(
-    new ethereum.EventParam("amount1", ethereum.Value.fromUnsignedBigInt(amount1))
+    new ethereum.EventParam(
+      'amount1',
+      ethereum.Value.fromUnsignedBigInt(amount1)
+    )
   )
-  
+
   return event
 }
 
@@ -62,8 +78,8 @@ export function createDecreaseLiquidityEvent(
   amount0: BigInt,
   amount1: BigInt
 ): DecreaseLiquidity {
-  let mockEvent = newMockEvent()
-  let event = new DecreaseLiquidity(
+  const mockEvent = newMockEvent()
+  const event = new DecreaseLiquidity(
     CONTRACT_ADDRESS,
     mockEvent.logIndex,
     mockEvent.transactionLogIndex,
@@ -73,21 +89,33 @@ export function createDecreaseLiquidityEvent(
     mockEvent.parameters,
     mockEvent.receipt
   )
-  
+
   event.parameters = new Array()
   event.parameters.push(
-    new ethereum.EventParam("tokenId", ethereum.Value.fromUnsignedBigInt(tokenId))
+    new ethereum.EventParam(
+      'tokenId',
+      ethereum.Value.fromUnsignedBigInt(tokenId)
+    )
   )
   event.parameters.push(
-    new ethereum.EventParam("liquidity", ethereum.Value.fromUnsignedBigInt(liquidity))
+    new ethereum.EventParam(
+      'liquidity',
+      ethereum.Value.fromUnsignedBigInt(liquidity)
+    )
   )
   event.parameters.push(
-    new ethereum.EventParam("amount0", ethereum.Value.fromUnsignedBigInt(amount0))
+    new ethereum.EventParam(
+      'amount0',
+      ethereum.Value.fromUnsignedBigInt(amount0)
+    )
   )
   event.parameters.push(
-    new ethereum.EventParam("amount1", ethereum.Value.fromUnsignedBigInt(amount1))
+    new ethereum.EventParam(
+      'amount1',
+      ethereum.Value.fromUnsignedBigInt(amount1)
+    )
   )
-  
+
   return event
 }
 
@@ -96,8 +124,8 @@ export function createTransferEvent(
   to: Address,
   tokenId: BigInt
 ): Transfer {
-  let mockEvent = newMockEvent()
-  let event = new Transfer(
+  const mockEvent = newMockEvent()
+  const event = new Transfer(
     CONTRACT_ADDRESS,
     mockEvent.logIndex,
     mockEvent.transactionLogIndex,
@@ -107,18 +135,21 @@ export function createTransferEvent(
     mockEvent.parameters,
     mockEvent.receipt
   )
-  
+
   event.parameters = new Array()
   event.parameters.push(
-    new ethereum.EventParam("from", ethereum.Value.fromAddress(from))
+    new ethereum.EventParam('from', ethereum.Value.fromAddress(from))
   )
   event.parameters.push(
-    new ethereum.EventParam("to", ethereum.Value.fromAddress(to))
+    new ethereum.EventParam('to', ethereum.Value.fromAddress(to))
   )
   event.parameters.push(
-    new ethereum.EventParam("tokenId", ethereum.Value.fromUnsignedBigInt(tokenId))
+    new ethereum.EventParam(
+      'tokenId',
+      ethereum.Value.fromUnsignedBigInt(tokenId)
+    )
   )
-  
+
   return event
 }
 
@@ -128,10 +159,10 @@ export function createSwapEvent(
   recipient: Address,
   amount0: BigInt,
   amount1: BigInt,
-  transactionFrom: Address = sender  // Default to sender for backwards compatibility
+  transactionFrom: Address = sender // Default to sender for backwards compatibility
 ): Swap {
-  let mockEvent = newMockEvent()
-  let event = new Swap(
+  const mockEvent = newMockEvent()
+  const event = new Swap(
     poolAddress,
     mockEvent.logIndex,
     mockEvent.transactionLogIndex,
@@ -141,32 +172,40 @@ export function createSwapEvent(
     mockEvent.parameters,
     mockEvent.receipt
   )
-  
+
   // Set the transaction initiator (actual user)
   event.transaction.from = transactionFrom
-  
+
   event.parameters = new Array()
   event.parameters.push(
-    new ethereum.EventParam("sender", ethereum.Value.fromAddress(sender))
+    new ethereum.EventParam('sender', ethereum.Value.fromAddress(sender))
   )
   event.parameters.push(
-    new ethereum.EventParam("recipient", ethereum.Value.fromAddress(recipient))
+    new ethereum.EventParam('recipient', ethereum.Value.fromAddress(recipient))
   )
   event.parameters.push(
-    new ethereum.EventParam("amount0", ethereum.Value.fromSignedBigInt(amount0))
+    new ethereum.EventParam('amount0', ethereum.Value.fromSignedBigInt(amount0))
   )
   event.parameters.push(
-    new ethereum.EventParam("amount1", ethereum.Value.fromSignedBigInt(amount1))
+    new ethereum.EventParam('amount1', ethereum.Value.fromSignedBigInt(amount1))
   )
   event.parameters.push(
-    new ethereum.EventParam("sqrtPriceX96", ethereum.Value.fromUnsignedBigInt(BigInt.fromString("1461446703485210103287273052203988822378723970342")))
+    new ethereum.EventParam(
+      'sqrtPriceX96',
+      ethereum.Value.fromUnsignedBigInt(
+        BigInt.fromString('1461446703485210103287273052203988822378723970342')
+      )
+    )
   )
   event.parameters.push(
-    new ethereum.EventParam("liquidity", ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(50000)))
+    new ethereum.EventParam(
+      'liquidity',
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(50000))
+    )
   )
   event.parameters.push(
-    new ethereum.EventParam("tick", ethereum.Value.fromI32(200))
+    new ethereum.EventParam('tick', ethereum.Value.fromI32(200))
   )
-  
+
   return event
-} 
+}

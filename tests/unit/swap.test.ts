@@ -5,10 +5,10 @@ import {
   clearStore,
   beforeAll,
   afterAll,
-  beforeEach
-} from "matchstick-as/assembly/index"
-import { Address, BigInt } from "@graphprotocol/graph-ts"
-import { handleSwap } from "../../src/pool"
+  beforeEach,
+} from 'matchstick-as/assembly/index'
+import { BigInt } from '@graphprotocol/graph-ts'
+import { handleSwap } from '../../src/pool'
 
 // Import test helpers
 import {
@@ -20,15 +20,15 @@ import {
   USER_2,
   createSwapEvent,
   getExpectedSwapId,
-  beforeEach as testBeforeEach
-} from "../helpers"
+  beforeEach as testBeforeEach,
+} from '../helpers'
 
 // Use the same pool addresses as in constants.ts
-const POOL_1_BITUSD_MBTILL = TRACKED_POOL    // BitUSD/mTBILL (BitUSD is token0)
-const POOL_2_WSTROSE_BITUSD = TRACKED_POOL_2  // wstROSE/BitUSD (BitUSD is token1)
-const POOL_3_WROSE_BITUSD = TRACKED_POOL_3    // wROSE/BitUSD (BitUSD is token1)
+const POOL_1_BITUSD_MBTILL = TRACKED_POOL // BitUSD/mTBILL (BitUSD is token0)
+const POOL_2_WSTROSE_BITUSD = TRACKED_POOL_2 // wstROSE/BitUSD (BitUSD is token1)
+const POOL_3_WROSE_BITUSD = TRACKED_POOL_3 // wROSE/BitUSD (BitUSD is token1)
 
-describe("BitUSD Purchase Event Handler", () => {
+describe('BitUSD Purchase Event Handler', () => {
   beforeAll(() => {
     // Setup any global mocks if needed
   })
@@ -41,50 +41,90 @@ describe("BitUSD Purchase Event Handler", () => {
     testBeforeEach()
   })
 
-  describe("Pool Filtering", () => {
-    test("handleSwap - tracked pool with BitUSD purchase creates purchase entity", () => {
+  describe('Pool Filtering', () => {
+    test('handleSwap - tracked pool with BitUSD purchase creates purchase entity', () => {
       // Setup BitUSD purchase in Pool 1 (BitUSD is token0)
-      let sender = USER_1  // Router contract
-      let recipient = USER_2
-      let actualUser = USER_2  // Actual transaction initiator
-      let amount0 = BigInt.fromI32(-1000) // Negative = receiving BitUSD (buying)
-      let amount1 = BigInt.fromI32(1500)  // Positive = giving mTBILL
+      const sender = USER_1 // Router contract
+      const recipient = USER_2
+      const actualUser = USER_2 // Actual transaction initiator
+      const amount0 = BigInt.fromI32(-1000) // Negative = receiving BitUSD (buying)
+      const amount1 = BigInt.fromI32(1500) // Positive = giving mTBILL
 
       // Create swap event for tracked pool
-      let swapEvent = createSwapEvent(
+      const swapEvent = createSwapEvent(
         POOL_1_BITUSD_MBTILL,
         sender,
         recipient,
         amount0,
         amount1,
-        actualUser  // Set transaction.from to actual user
+        actualUser // Set transaction.from to actual user
       )
 
       // Handle the event
       handleSwap(swapEvent)
 
       // Verify User entity was created with volume tracking (for actual user, not router)
-      assert.fieldEquals("User", actualUser.toHexString(), "id", actualUser.toHexString())
-      assert.fieldEquals("User", actualUser.toHexString(), "totalBitUSDVolume", "1000")
+      assert.fieldEquals(
+        'User',
+        actualUser.toHexString(),
+        'id',
+        actualUser.toHexString()
+      )
+      assert.fieldEquals(
+        'User',
+        actualUser.toHexString(),
+        'totalBitUSDVolume',
+        '1000'
+      )
 
       // Verify BitUSDPurchase entity was created
-      let expectedPurchaseId = getExpectedSwapId()
-      assert.fieldEquals("BitUSDPurchase", expectedPurchaseId, "id", expectedPurchaseId)
-      assert.fieldEquals("BitUSDPurchase", expectedPurchaseId, "pool", POOL_1_BITUSD_MBTILL.toHexString())
-      assert.fieldEquals("BitUSDPurchase", expectedPurchaseId, "user", actualUser.toHexString())  // Points to actual user
-      assert.fieldEquals("BitUSDPurchase", expectedPurchaseId, "sender", sender.toHexString())  // Still tracks router
-      assert.fieldEquals("BitUSDPurchase", expectedPurchaseId, "bitUSDAmount", "1000")
-      assert.fieldEquals("BitUSDPurchase", expectedPurchaseId, "otherTokenAmount", "1500")
+      const expectedPurchaseId = getExpectedSwapId()
+      assert.fieldEquals(
+        'BitUSDPurchase',
+        expectedPurchaseId,
+        'id',
+        expectedPurchaseId
+      )
+      assert.fieldEquals(
+        'BitUSDPurchase',
+        expectedPurchaseId,
+        'pool',
+        POOL_1_BITUSD_MBTILL.toHexString()
+      )
+      assert.fieldEquals(
+        'BitUSDPurchase',
+        expectedPurchaseId,
+        'user',
+        actualUser.toHexString()
+      ) // Points to actual user
+      assert.fieldEquals(
+        'BitUSDPurchase',
+        expectedPurchaseId,
+        'sender',
+        sender.toHexString()
+      ) // Still tracks router
+      assert.fieldEquals(
+        'BitUSDPurchase',
+        expectedPurchaseId,
+        'bitUSDAmount',
+        '1000'
+      )
+      assert.fieldEquals(
+        'BitUSDPurchase',
+        expectedPurchaseId,
+        'otherTokenAmount',
+        '1500'
+      )
     })
 
-    test("handleSwap - BitUSD purchase in Pool 2 (BitUSD as token1)", () => {
+    test('handleSwap - BitUSD purchase in Pool 2 (BitUSD as token1)', () => {
       // Setup BitUSD purchase in Pool 2 (BitUSD is token1)
-      let sender = USER_1
-      let recipient = USER_2
-      let amount0 = BigInt.fromI32(800)   // Positive = giving wstROSE
-      let amount1 = BigInt.fromI32(-500)  // Negative = receiving BitUSD (buying)
+      const sender = USER_1
+      const recipient = USER_2
+      const amount0 = BigInt.fromI32(800) // Positive = giving wstROSE
+      const amount1 = BigInt.fromI32(-500) // Negative = receiving BitUSD (buying)
 
-      let swapEvent = createSwapEvent(
+      const swapEvent = createSwapEvent(
         POOL_2_WSTROSE_BITUSD,
         sender,
         recipient,
@@ -94,19 +134,29 @@ describe("BitUSD Purchase Event Handler", () => {
 
       handleSwap(swapEvent)
 
-      let expectedPurchaseId = getExpectedSwapId()
-      assert.fieldEquals("BitUSDPurchase", expectedPurchaseId, "bitUSDAmount", "500")
-      assert.fieldEquals("BitUSDPurchase", expectedPurchaseId, "otherTokenAmount", "800")
+      const expectedPurchaseId = getExpectedSwapId()
+      assert.fieldEquals(
+        'BitUSDPurchase',
+        expectedPurchaseId,
+        'bitUSDAmount',
+        '500'
+      )
+      assert.fieldEquals(
+        'BitUSDPurchase',
+        expectedPurchaseId,
+        'otherTokenAmount',
+        '800'
+      )
     })
 
-    test("handleSwap - BitUSD selling (not buying) does not create entity", () => {
+    test('handleSwap - BitUSD selling (not buying) does not create entity', () => {
       // Setup BitUSD selling in Pool 1 (opposite direction)
-      let sender = USER_1
-      let recipient = USER_2
-      let amount0 = BigInt.fromI32(1000)  // Positive = giving BitUSD (selling)
-      let amount1 = BigInt.fromI32(-1500) // Negative = receiving mTBILL
+      const sender = USER_1
+      const recipient = USER_2
+      const amount0 = BigInt.fromI32(1000) // Positive = giving BitUSD (selling)
+      const amount1 = BigInt.fromI32(-1500) // Negative = receiving mTBILL
 
-      let swapEvent = createSwapEvent(
+      const swapEvent = createSwapEvent(
         POOL_1_BITUSD_MBTILL,
         sender,
         recipient,
@@ -117,18 +167,18 @@ describe("BitUSD Purchase Event Handler", () => {
       handleSwap(swapEvent)
 
       // Verify no entities were created (we only track purchases)
-      let expectedPurchaseId = getExpectedSwapId()
-      assert.notInStore("BitUSDPurchase", expectedPurchaseId)
-      assert.notInStore("User", sender.toHexString())
+      const expectedPurchaseId = getExpectedSwapId()
+      assert.notInStore('BitUSDPurchase', expectedPurchaseId)
+      assert.notInStore('User', sender.toHexString())
     })
 
-    test("handleSwap - untracked pool does not create entity", () => {
-      let sender = USER_1
-      let recipient = USER_2
-      let amount0 = BigInt.fromI32(-1000)
-      let amount1 = BigInt.fromI32(1500)
+    test('handleSwap - untracked pool does not create entity', () => {
+      const sender = USER_1
+      const recipient = USER_2
+      const amount0 = BigInt.fromI32(-1000)
+      const amount1 = BigInt.fromI32(1500)
 
-      let swapEvent = createSwapEvent(
+      const swapEvent = createSwapEvent(
         UNTRACKED_POOL,
         sender,
         recipient,
@@ -138,74 +188,89 @@ describe("BitUSD Purchase Event Handler", () => {
 
       handleSwap(swapEvent)
 
-      let expectedPurchaseId = getExpectedSwapId()
-      assert.notInStore("BitUSDPurchase", expectedPurchaseId)
-      assert.notInStore("User", sender.toHexString())
+      const expectedPurchaseId = getExpectedSwapId()
+      assert.notInStore('BitUSDPurchase', expectedPurchaseId)
+      assert.notInStore('User', sender.toHexString())
     })
   })
 
-  describe("User Volume Tracking", () => {
-    test("handleSwap - accumulates user BitUSD volume across purchases", () => {
-      let actualUser = USER_1  // Transaction initiator (actual user)
-      
+  describe('User Volume Tracking', () => {
+    test('handleSwap - accumulates user BitUSD volume across purchases', () => {
+      const actualUser = USER_1 // Transaction initiator (actual user)
+
       // First purchase: 1000 BitUSD
-      let swapEvent1 = createSwapEvent(
+      const swapEvent1 = createSwapEvent(
         POOL_1_BITUSD_MBTILL,
-        USER_2,  // Router
-        USER_2,  // Recipient
+        USER_2, // Router
+        USER_2, // Recipient
         BigInt.fromI32(-1000), // Buying 1000 BitUSD
         BigInt.fromI32(1500),
-        actualUser  // Actual user making the purchase
+        actualUser // Actual user making the purchase
       )
 
       handleSwap(swapEvent1)
-      assert.fieldEquals("User", actualUser.toHexString(), "totalBitUSDVolume", "1000")
+      assert.fieldEquals(
+        'User',
+        actualUser.toHexString(),
+        'totalBitUSDVolume',
+        '1000'
+      )
 
       // Second purchase: 500 BitUSD (total should be 1500)
       clearStore() // Clear to simulate different transaction
-      
-      let swapEvent2 = createSwapEvent(
+
+      const swapEvent2 = createSwapEvent(
         POOL_2_WSTROSE_BITUSD,
-        USER_2,  // Router
-        USER_2,  // Recipient
+        USER_2, // Router
+        USER_2, // Recipient
         BigInt.fromI32(800),
         BigInt.fromI32(-500), // Buying 500 BitUSD
-        actualUser  // Same actual user making another purchase
+        actualUser // Same actual user making another purchase
       )
 
       handleSwap(swapEvent2)
 
       // Volume should accumulate (but since we cleared store, it starts fresh)
       // In real scenario, volume would accumulate to 1500
-      assert.fieldEquals("User", actualUser.toHexString(), "totalBitUSDVolume", "500")
+      assert.fieldEquals(
+        'User',
+        actualUser.toHexString(),
+        'totalBitUSDVolume',
+        '500'
+      )
     })
 
-    test("handleSwap - updates last purchase timestamp", () => {
-      let actualUser = USER_1
-      let swapEvent = createSwapEvent(
+    test('handleSwap - updates last purchase timestamp', () => {
+      const actualUser = USER_1
+      const swapEvent = createSwapEvent(
         POOL_1_BITUSD_MBTILL,
-        USER_2,  // Router
-        USER_2,  // Recipient
+        USER_2, // Router
+        USER_2, // Recipient
         BigInt.fromI32(-1000),
         BigInt.fromI32(1500),
-        actualUser  // Actual user
+        actualUser // Actual user
       )
 
       handleSwap(swapEvent)
 
       // Check that lastPurchaseTimestamp is set (mock events have timestamp = 1)
-      assert.fieldEquals("User", actualUser.toHexString(), "lastPurchaseTimestamp", "1")
+      assert.fieldEquals(
+        'User',
+        actualUser.toHexString(),
+        'lastPurchaseTimestamp',
+        '1'
+      )
     })
   })
 
-  describe("Different Pool Types", () => {
-    test("handleSwap - Pool 3 wROSE/BitUSD purchases", () => {
-      let sender = USER_1
-      let recipient = USER_2
-      let amount0 = BigInt.fromI32(2000)  // Giving wROSE
-      let amount1 = BigInt.fromI32(-750)  // Receiving BitUSD
+  describe('Different Pool Types', () => {
+    test('handleSwap - Pool 3 wROSE/BitUSD purchases', () => {
+      const sender = USER_1
+      const recipient = USER_2
+      const amount0 = BigInt.fromI32(2000) // Giving wROSE
+      const amount1 = BigInt.fromI32(-750) // Receiving BitUSD
 
-      let swapEvent = createSwapEvent(
+      const swapEvent = createSwapEvent(
         POOL_3_WROSE_BITUSD,
         sender,
         recipient,
@@ -215,9 +280,19 @@ describe("BitUSD Purchase Event Handler", () => {
 
       handleSwap(swapEvent)
 
-      let expectedPurchaseId = getExpectedSwapId()
-      assert.fieldEquals("BitUSDPurchase", expectedPurchaseId, "bitUSDAmount", "750")
-      assert.fieldEquals("BitUSDPurchase", expectedPurchaseId, "otherTokenAmount", "2000")
+      const expectedPurchaseId = getExpectedSwapId()
+      assert.fieldEquals(
+        'BitUSDPurchase',
+        expectedPurchaseId,
+        'bitUSDAmount',
+        '750'
+      )
+      assert.fieldEquals(
+        'BitUSDPurchase',
+        expectedPurchaseId,
+        'otherTokenAmount',
+        '2000'
+      )
     })
   })
-}) 
+})

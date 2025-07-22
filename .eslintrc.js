@@ -20,31 +20,34 @@ module.exports = {
   rules: {
     // Prettier integration
     'prettier/prettier': 'error',
-    
+
     // TypeScript specific rules
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/prefer-const': 'error',
-    
+
     // AssemblyScript/Graph specific adjustments
     '@typescript-eslint/no-non-null-assertion': 'off', // AssemblyScript uses ! frequently
     '@typescript-eslint/ban-types': 'off', // AssemblyScript has different type system
-    
+
     // General code quality
     'no-console': 'warn',
     'no-debugger': 'error',
     'prefer-const': 'error',
     'no-var': 'error',
-    
+
     // Import organization
-    'sort-imports': ['error', {
-      'ignoreCase': false,
-      'ignoreDeclarationSort': true,
-      'ignoreMemberSort': false,
-      'memberSyntaxSortOrder': ['none', 'all', 'multiple', 'single'],
-    }],
+    'sort-imports': [
+      'error',
+      {
+        ignoreCase: false,
+        ignoreDeclarationSort: true,
+        ignoreMemberSort: false,
+        memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
+      },
+    ],
   },
   overrides: [
     {
@@ -73,4 +76,4 @@ module.exports = {
     '*.js',
     'docker-compose.yml',
   ],
-}; 
+}

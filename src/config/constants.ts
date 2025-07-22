@@ -1,4 +1,4 @@
-import { Address, BigInt } from '@graphprotocol/graph-ts'
+import { Address } from '@graphprotocol/graph-ts'
 import { PoolConfig } from '../utils/pool'
 
 // Configuration for all tracked pools
@@ -17,13 +17,15 @@ export const POOL_CONFIGS: PoolConfig[] = [
     Address.fromString('0x99ac8cA7087fA4A2A1FB6357269965A2014ABc35'), // wbtc/usdc
     1, // BitUSD is token1
     'wROSE/BitUSD'
-  )
+  ),
 ]
 
 // Individual pool addresses for easy import
-export const POOL_BITUSD_MBTILL = POOL_CONFIGS[0].address      // BitUSD/mTBILL pool
-export const POOL_WSTROSE_BITUSD = POOL_CONFIGS[1].address     // wstROSE/BitUSD pool  
-export const POOL_WROSE_BITUSD = POOL_CONFIGS[2].address       // wROSE/BitUSD pool
+export const POOL_BITUSD_MBTILL = POOL_CONFIGS[0].address // BitUSD/mTBILL pool
+export const POOL_WSTROSE_BITUSD = POOL_CONFIGS[1].address // wstROSE/BitUSD pool
+export const POOL_WROSE_BITUSD = POOL_CONFIGS[2].address // wROSE/BitUSD pool
 
 // Derived arrays for convenience
-export const TARGET_POOLS: Address[] = POOL_CONFIGS.map<Address>(config => config.address) 
+export const TARGET_POOLS: Address[] = POOL_CONFIGS.map<Address>(
+  config => config.address
+)
