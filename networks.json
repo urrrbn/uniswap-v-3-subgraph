@@ -19,20 +19,14 @@
   },
   "sepolia": {
     "NonfungiblePositionManager": {
-      "address": "0x5bE4DAa6982C69aD20A57F1e68cBcA3D37de6207",
-      "startBlock": 8171580
+      "address": "0x1238536071E1c677A632429e3655c799b22cDA52",
+      "startBlock": 8839817
+
     },
     "BitUSDmTBILLPool": {
-      "address": "",
-      "startBlock": 8171580
-    },
-    "wstROSEBitUSDPool": {
-      "address": "",
-      "startBlock": 8171580
-    },
-    "wROSEBitUSDPool": {
-      "address": "",
-      "startBlock": 8171580
+      "address": "0x33cFE8f63518Dc43798B6BC0009a42c73D87B0Cf",
+      "startBlock": 8839817
+
     }
   }
 }
