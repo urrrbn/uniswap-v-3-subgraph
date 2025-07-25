@@ -3,14 +3,12 @@ import {
   DecreaseLiquidity as DecreaseLiquidityEvent,
   IncreaseLiquidity as IncreaseLiquidityEvent,
   Transfer as TransferEvent,
-} from '../generated/NonfungiblePositionManager/NonfungiblePositionManager'
-import { Position } from '../generated/schema'
-import { isTrackedPool } from './utils/pool'
-import {
-  loadOrCreateUser,
-  createPositionEvent,
-  getOrInitPosition,
-} from './utils/entities'
+} from '../../generated/NonfungiblePositionManager/NonfungiblePositionManager'
+import { Position } from '../../generated/schema'
+import { isTrackedPool } from '../helpers/pool'
+import { getOrCreatePosition } from '../getOrCreate/position'
+import { getOrCreateUser } from '../getOrCreate/user'
+import { createPositionEvent } from '../getOrCreate/positionEvent'
 
 export function handleDecreaseLiquidity(event: DecreaseLiquidityEvent): void {
   // For decreases, only process existing positions - don't create new ones
@@ -46,7 +44,7 @@ export function handleDecreaseLiquidity(event: DecreaseLiquidityEvent): void {
 }
 
 export function handleIncreaseLiquidity(event: IncreaseLiquidityEvent): void {
-  const position = getOrInitPosition(event, event.params.tokenId)
+  const position = getOrCreatePosition(event, event.params.tokenId)
   if (position == null) return // <- early exit for untracked pools
 
   const liquidityDelta = event.params.liquidity
@@ -88,11 +86,11 @@ export function handleTransfer(event: TransferEvent): void {
 
   // Handle new position creation (mint from zero address)
   if (from.equals(Address.zero())) {
-    const position = getOrInitPosition(event, tokenId)
+    const position = getOrCreatePosition(event, tokenId)
     if (position == null) return // <- early exit for untracked pools
 
     // Update owner
-    position.owner = loadOrCreateUser(to).id
+    position.owner = getOrCreateUser(to).id
     // Don't set createdAt here - let IncreaseLiquidity handle the MINT event
     position.save()
 
@@ -127,7 +125,7 @@ export function handleTransfer(event: TransferEvent): void {
   // Handle burn (transfer to zero address)
   if (to.equals(Address.zero())) {
     // Update owner to zero address
-    position.owner = loadOrCreateUser(to).id
+    position.owner = getOrCreateUser(to).id
     position.save()
 
     // Create transfer event
@@ -149,7 +147,7 @@ export function handleTransfer(event: TransferEvent): void {
 
   // Handle regular transfers (not from/to zero address)
   // Update position owner
-  position.owner = loadOrCreateUser(to).id
+  position.owner = getOrCreateUser(to).id
   position.save()
 
   // Create transfer event

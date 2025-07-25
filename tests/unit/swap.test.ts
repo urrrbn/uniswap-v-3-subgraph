@@ -8,7 +8,7 @@ import {
   beforeEach,
 } from 'matchstick-as/assembly/index'
 import { BigInt } from '@graphprotocol/graph-ts'
-import { handleSwap } from '../../src/pool'
+import { handleSwap } from '../../src/handlers/pool.handler'
 
 // Import test helpers
 import {

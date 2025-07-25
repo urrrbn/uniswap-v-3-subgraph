@@ -12,7 +12,7 @@ import {
   handleDecreaseLiquidity,
   handleIncreaseLiquidity,
   handleTransfer,
-} from '../../src/nonfungible-position-manager'
+} from '../../src/handlers/nonfungible-position-manager.handler'
 
 // Import test helpers
 import {

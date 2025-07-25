@@ -1,8 +1,38 @@
 {
-  "mainnet": {
+  "oasis-sapphire-mainnet": {
     "NonfungiblePositionManager": {
-      "address": "0xC36442b4a4522E871399CD717aBDD847Ab11FE88",
-      "startBlock": 19000000
+      "address": "0x2D69C85166B8B84916EF49FF20f287f9Eb6381fe",
+      "startBlock": 8171580
+    },
+    "BitUSDmTBILLPool": {
+      "address": "0x3416cF6C708Da44DB2624D63ea0AAef7113527C6",
+      "startBlock": 8171580
+    },
+    "wstROSEBitUSDPool": {
+      "address": "0xeb941037f8aa4ce8680666b8af62dd88b2227da2",
+      "startBlock": 8171580
+    },
+    "wROSEBitUSDPool": {
+      "address": "0x419fe2b60f0ea02051b073b71f2326550d371f94",
+      "startBlock": 8171580
+    }
+  },
+  "sepolia": {
+    "NonfungiblePositionManager": {
+      "address": "0x5bE4DAa6982C69aD20A57F1e68cBcA3D37de6207",
+      "startBlock": 8171580
+    },
+    "BitUSDmTBILLPool": {
+      "address": "",
+      "startBlock": 8171580
+    },
+    "wstROSEBitUSDPool": {
+      "address": "",
+      "startBlock": 8171580
+    },
+    "wROSEBitUSDPool": {
+      "address": "",
+      "startBlock": 8171580
     }
   }
 }

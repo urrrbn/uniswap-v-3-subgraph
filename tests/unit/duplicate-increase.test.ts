@@ -5,7 +5,7 @@ import {
   beforeEach,
 } from 'matchstick-as/assembly/index'
 import { BigInt } from '@graphprotocol/graph-ts'
-import { handleIncreaseLiquidity } from '../../src/nonfungible-position-manager'
+import { handleIncreaseLiquidity } from '../../src/handlers/nonfungible-position-manager.handler'
 import {
   beforeEach as testBeforeEach,
   USER_1,

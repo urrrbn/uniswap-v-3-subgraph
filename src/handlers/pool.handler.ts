@@ -1,12 +1,12 @@
-import { Swap as SwapEvent } from '../generated/BitUSDmTBILLPool/UniswapV3Pool'
-import { BitUSDPurchase } from '../generated/schema'
+import { Swap as SwapEvent } from '../../generated/BitUSDmTBILLPool/UniswapV3Pool'
+import { BitUSDPurchase } from '../../generated/schema'
 import {
   isTrackedPool,
   isBuyingBitUSD,
   getBitUSDAmount,
   getOtherTokenAmount,
-} from './utils/pool'
-import { loadOrCreateUser } from './utils/entities'
+} from '../helpers/pool'
+import { getOrCreateUser } from '../getOrCreate/user'
 
 export function handleSwap(event: SwapEvent): void {
   // Only process swaps from tracked pools
@@ -26,7 +26,7 @@ export function handleSwap(event: SwapEvent): void {
   const recipient = event.params.recipient
   const bitUSDAmount = getBitUSDAmount(event.address, amount0, amount1)
   const otherTokenAmount = getOtherTokenAmount(event.address, amount0, amount1)
-  const user = loadOrCreateUser(event.transaction.from)
+  const user = getOrCreateUser(event.transaction.from)
 
   // Update user's total BitUSD volume and last purchase timestamp
   user.totalBitUSDVolume = user.totalBitUSDVolume.plus(bitUSDAmount)

@@ -8,7 +8,7 @@ import { BigInt } from '@graphprotocol/graph-ts'
 import {
   handleIncreaseLiquidity,
   handleTransfer,
-} from '../../src/nonfungible-position-manager'
+} from '../../src/handlers/nonfungible-position-manager.handler'
 import {
   beforeEach as testBeforeEach,
   USER_1,
